@@ -1,9 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const todoHandler = require("./Routhandler/todoHandler");
+const userHandler = require("./Routhandler/userHandler");
+const defaultError = require("./Error handling/defaultError");
+const dotenv = require("dotenv");
 //express app initialization
 const app = express();
-app.use(express.json());
 
 //database connection
 const db = async () => {
@@ -18,21 +20,15 @@ const db = async () => {
   }
 };
 db();
-// mongoose
-//   .connect("mongodb://localhost/Todos", {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   })
-//   .then(() => {
-//     console.log("Connection with database is successfull.");
-//   })
-//   .catch((err) => {
-//     console.log(err);
-//   });
 
 //application routes
+dotenv.config();
+app.use(express.json());
 app.use("/todo", todoHandler);
+app.use("/user", userHandler);
 
+//error handling
+app.use(defaultError);
 //opening server
 app.listen(3000, () => {
   console.log("I am listening");

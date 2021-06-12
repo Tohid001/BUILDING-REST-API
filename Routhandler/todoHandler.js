@@ -1,16 +1,17 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const todoSchema = require("../Schemas/todoSchema");
-const ToDo = new mongoose.model("Todo", todoSchema);
-//Router initialization
 const todoHandler = express.Router();
+const mongoose = require("mongoose");
+const checkLogIn = require("../Middlewares/Checklogin");
+const todoSchema = require("../Schemas/todoSchema");
+const userSchema = require("../Schemas/userSchema");
+const ToDo = new mongoose.model("Todo", todoSchema);
+const User = new mongoose.model("User", userSchema);
+//Router initialization
 
 //get all/multiple todos
-todoHandler.get("/", async (req, res, next) => {
+todoHandler.get("/", checkLogIn, async (req, res, next) => {
   try {
-    const data = await ToDo.find({ author: "Tohid", title: true }).select({
-      date: 0,
-    });
+    const data = await ToDo.find().populate("user", "firstName gender -_id");
     res.status(200).json({ informations: data });
     console.log("todo was inserted successfully!");
   } catch (error) {
@@ -20,26 +21,29 @@ todoHandler.get("/", async (req, res, next) => {
 });
 
 //get a todo
-todoHandler.get("/:id", async (req, res, next) => {
-  try {
-    const data = await ToDo.findById({ _id: req.params.id }).select({
-      date: 0,
-    });
-    res.status(200).json({ informations: data });
-    console.log("todo was inserted successfully!");
-  } catch (error) {
-    console.log(`${error}`);
-    res.status(500).json({ message: `There was an error!${error}` });
-  }
-});
+// todoHandler.get("/:id", async (req, res, next) => {
+//   try {
+//     const data = await ToDo.findById({ _id: req.params.id }).select({
+//       date: 0,
+//     });
+//     res.status(200).json({ informations: data });
+//     console.log("todo was inserted successfully!");
+//   } catch (error) {
+//     console.log(`${error}`);
+//     res.status(500).json({ message: `There was an error!${error}` });
+//   }
+// });
 
 //post a todo
-todoHandler.post("/", async (req, res, next) => {
+todoHandler.post("/", checkLogIn, async (req, res, next) => {
   try {
-    const newToDo = new ToDo(req.body);
-    await newToDo.save();
-    res.status(200).json({ message: "todo was inserted successfully!" });
-    console.log("todo was inserted successfully!");
+    const newToDo = new ToDo({ ...req.body, user: req.userId });
+    const todo = await newToDo.save();
+    await User.updateOne({ _id: req.userId }, { $push: { todos: todo._id } });
+    res.status(200).json({
+      message: `hey ${req.userName}! your todo is inserted successfully!"`,
+    });
+    console.log(`hey ${req.userName}"! your todo is inserted successfully!"`);
   } catch (error) {
     console.log(`${error}`);
     res.status(500).json({ message: `There was an error!${error}` });
@@ -47,16 +51,16 @@ todoHandler.post("/", async (req, res, next) => {
 });
 
 //post multiple todos
-todoHandler.post("/all", async (req, res, next) => {
-  try {
-    await ToDo.insertMany(req.body);
-    res.status(200).json({ message: "todos were inserted successfully!" });
-    console.log("todos were added successfully!");
-  } catch (error) {
-    console.log(`${error}`);
-    res.status(500).json({ message: `There was an error!${error}` });
-  }
-});
+// todoHandler.post("/all", async (req, res, next) => {
+//   try {
+//     await ToDo.insertMany(req.body);
+//     res.status(200).json({ message: "todos were inserted successfully!" });
+//     console.log("todos were added successfully!");
+//   } catch (error) {
+//     console.log(`${error}`);
+//     res.status(500).json({ message: `There was an error!${error}` });
+//   }
+// });
 
 //update a todo
 todoHandler.put("/:id", async (req, res, next) => {
@@ -68,6 +72,7 @@ todoHandler.put("/:id", async (req, res, next) => {
     );
     console.log("todo was inserted successfully!");
     console.log(data);
+
     res.status(200).json({ message: "todo was updated successfully!" });
   } catch (error) {
     console.log(`${error}`);
@@ -109,6 +114,5 @@ todoHandler.delete("/:user", async (req, res, next) => {
     res.status(500).json({ message: `There was an error!${error}` });
   }
 });
-console.log("hello");
 
 module.exports = todoHandler;

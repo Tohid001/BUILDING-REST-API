@@ -12,15 +12,23 @@
     "url": "git+https://github.com/Tohid001/BUILDING-REAST-API.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Tohid",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Tohid001/BUILDING-REAST-API/issues"
   },
   "homepage": "https://github.com/Tohid001/BUILDING-REAST-API#readme",
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "ejs": "^3.1.6",
     "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.13",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.2",
     "nodemon": "^2.0.7"
   }
 }
